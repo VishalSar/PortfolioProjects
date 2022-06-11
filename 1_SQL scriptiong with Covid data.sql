@@ -130,3 +130,41 @@ JOIN PortfolioProject..CovidVaccinations vac
 
 SELECT *, (RollingPeopleVaccinated/Population)*100 as PopPercentVac
 FROM #PercentPopulationVaccinated
+
+
+
+
+
+
+--Queries used for Tableau Visualization: Link to my covid dashboard - tableau public --> https://public.tableau.com/app/profile/vishal.sarvand/viz/CovidDashboard_16549624344270/Dashboard1
+
+--1. Total cases, Total Deaths and Death %
+
+SELECT SUM(new_cases) AS total_cases, SUM(CAST(new_deaths AS int)) AS total_deaths, SUM(CAST(new_deaths AS int))/SUM(New_Cases)*100 AS DeathPercentage
+FROM PortfolioProject..CovidDeaths
+WHERE continent is not null
+ORDER BY 1,2
+
+--2. Death count by continent
+
+SELECT location, SUM(CAST(new_deaths AS int)) AS TotalDeathCount
+FROM PortfolioProject..CovidDeaths
+WHERE continent is null 
+and location not in ('World', 'European Union', 'International', 'Upper middle income', 'High income', 'Lower middle income', 'European Union', 'Low income', 'International')
+--Excluding data that we do not need. European Union comes in Europe so excluding that as well
+GROUP BY location
+ORDER BY TotalDeathCount DESC
+
+--3. Total cases per country and infection rate
+
+SELECT Location, Population, MAX(total_cases) AS HighestInfectionCount,  MAX((total_cases/population))*100 AS PercentPopulationInfected
+FROM PortfolioProject..CovidDeaths
+GROUP BY Location, Population
+ORDER BY PercentPopulationInfected DESC
+
+--4. Total cases per country and infection rate by date
+
+SELECT Location, Population, date, MAX(total_cases) AS HighestInfectionCount,  Max((total_cases/population))*100 AS PercentPopulationInfected
+FROM PortfolioProject..CovidDeaths
+GROUP BY Location, Population, date
+ORDER BY PercentPopulationInfected DESC
